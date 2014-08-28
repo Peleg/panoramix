@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+  <head>
+    <style>
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+      }
+    </style>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="panoramix.js"></script>
+    <script>
+      $(document).on('ready', function () {
+        $('.box').panoramix({
+          imageUrl: 'assets/bg/wall.jpg',
+          load: function () {
+            // bind adding new images
+            $('input:file').change(function () {
+              var f = this.files[0];
+              var reader = new FileReader();
+
+              reader.onload = function(file) {
+                return function (e) {
+                  $('.pmx-children').append($('<img/>', {
+                    src: e.target.result,
+                    'data-width': 100
+                  }));
+
+                  $('.box').panoramix('setupChildren');
+                  $('.box').panoramix('layout');
+                }
+              }(f);
+
+              reader.readAsDataURL(f);
+
+            });
+          }
+        });
+      })
+    </script>
+  </head>
+
+  <body>
+    <div class="box" style="width: 100%; height: 100%; margin: 0 auto;">
+      <a href="javascript:alert('clicked!');" data-width='600' data-left='217' data-top='300'>
+        <img alt="fuck alts" src="assets/chldrn/ppl/1.png" style="max-width: 100%;">
+      </a>
+      <a href="javascript:alert('clicked!');" data-width='200' data-left='1000' data-top='280'>
+        <img alt="fuck alts" src="assets/chldrn/ppl/2.png" style="max-width: 100%;">
+      </a>
+      <a href="javascript:alert('clicked!');" data-width='120' data-left='1517' data-top='400'>
+        <img alt="fuck alts" src="assets/chldrn/ppl/3.png" style="max-width: 100%;">
+      </a>
+      <a href="javascript:alert('clicked!');" data-width='600' data-left='1517' data-top='300'>
+        <img alt="fuck alts" src="assets/chldrn/ppl/4.gif" style="max-width: 100%;">
+      </a>
+      <a href="javascript:alert('clicked!');" data-width='380' data-left='2100' data-top='350'>
+        <img alt="fuck alts" src="assets/chldrn/ppl/6.png" style="max-width: 100%;">
+      </a>
+    </div>
+
+    <!--<form action="">-->
+      <!--<input type="FILE">-->
+    <!--</form>-->
+  </body>
+</html>
