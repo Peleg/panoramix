@@ -86,7 +86,7 @@
         // TODO: make sure clientX is correct
         newLeft = parseInt(that.$imageCont.css('backgroundPosition')) + (e.clientX - that.lastX);
         newLeft = Math.min(0, Math.max(newLeft, that.maxLeft)) + 'px';
-        that.$imageCont.css('backgroundPosition', newLeft);
+        that.$imageCont.css('backgroundPosition', newLeft + ' 0px');
         that.$childrenCont.css('left', newLeft);
       }
       that.lastX = e.clientX;
@@ -166,7 +166,7 @@
         'backgroundImage'     : 'url(' + this.image.src + ')',
         'backgroundRepeat'    : this.options.repeat,
         'backgroundSize'      : 'cover',
-        'backgroundPosition'  : '0px',
+        'backgroundPosition'  : '0px 0px',
         'width'               : '100%',
         'height'              : '100%',
         'display'             : 'none'
