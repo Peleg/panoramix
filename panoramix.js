@@ -15,16 +15,18 @@
     this.options   = $.extend(Panoramix.DEFAULTS, options);
     this.$window   = $(window);
     this.maxLeft   =
-    this.scaleX    =
-    this.scaleY    =
     this.scale     = null;
 
     this.loadImage(options.imageUrl, function () {
       that.showImage();
       that.bindDragging();
       that.layout();
+
+      var timeOut;
       that.$window.resize(function () {
-        that.layout();
+        setTimeout(function () {
+          that.layout();
+        }, 500);
       });
       if (typeof that.options.load === 'function') {
         that.options.load();
@@ -33,14 +35,12 @@
 
     this.setupHtml();
     this.setupChildren();
-
   };
 
   Panoramix.PREFIX = 'pmx-';
 
-    // TODO: add: startingPoint, css arrows + jumps
   Panoramix.DEFAULTS = {
-    repeat : 'no-repeat',
+    walls  : 1,
     load   : null
   };
 
@@ -52,43 +52,64 @@
   // Caches children data attributes (dimensions + positions)
   // when arent passed in an array
   Panoramix.prototype.setupChildren = function () {
-    var $child;
+    var data;
     var $children = this.$childrenCont.children().css('position', 'absolute');
     this.children = $children.map(function (_i, child) {
-      $child = $(child);
+      data = $(child).data();
       return {
-        '$element' : $child,
-        'width'    : $child.data('width'),
-        'top'      : $child.data('top'),
-        'left'     : $child.data('left')
+        '$element' : $(child),
+        'width'    : data.width,
+        'top'      : data.top,
+        'left'     : data.left
       };
     });
   };
 
   // Loads panorama image asyncly and calls cb when done
   Panoramix.prototype.loadImage = function(imageUrl, cb) {
-    this.image = new Image();
-    this.image.onload = cb;
-    this.image.src = imageUrl;
+    var image = new Image();
+    image.onload = cb;
+    image.src = imageUrl;
+    this.image = image;
   };
 
   Panoramix.prototype.showImage = function () {
     this.$imageCont.fadeIn();
   };
 
-  Panoramix.prototype.bindDragging = function () {
-    var newLeft;
+  Panoramix.prototype.newLeft = function (px) {
+    var newLeft = parseInt(this.$imageCont.css('backgroundPosition')) + px;
+    return Math.min(0, Math.max(newLeft, this.maxLeft)) + 'px';
+  };
 
+  Panoramix.prototype.moveLeft = function (px) {
+    var newLeft = this.newLeft(px);
+    this.$imageCont.css('backgroundPosition', newLeft + ' 0px');
+    this.$childrenCont.css('left', newLeft);
+  },
+
+  Panoramix.prototype.slide = function (direction) {
+    var px = (direction === 'right' ? -1 : 1) * parseInt(this.$imageCont.width());
+    var newLeft = this.newLeft(px);
+    this.$imageCont.animate({
+      'backgroundPosition' : newLeft
+    }, {
+      'easing'   : 'swing',
+      'duration' : 1000
+    });
+    this.$childrenCont.animate({
+      'left' : newLeft
+    }, {
+      'easing'   : 'swing',
+      'duration' : 1000
+    });
+  };
+
+  Panoramix.prototype.bindDragging = function () {
     var mousemove = function (e) {
       e.preventDefault();
       e.clientX || (e = window.event.touches[0]);
-      if (that.lastX) {
-        // TODO: make sure clientX is correct
-        newLeft = parseInt(that.$imageCont.css('backgroundPosition')) + (e.clientX - that.lastX);
-        newLeft = Math.min(0, Math.max(newLeft, that.maxLeft)) + 'px';
-        that.$imageCont.css('backgroundPosition', newLeft + ' 0px');
-        that.$childrenCont.css('left', newLeft);
-      }
+      if (that.lastX) that.moveLeft(e.clientX - that.lastX);
       that.lastX = e.clientX;
     };
 
@@ -104,10 +125,16 @@
   };
 
   Panoramix.prototype.updateScale = function () {
-    this.scaleX  = this.$imageCont.width() / this.image.width;
-    this.scaleY  = this.$imageCont.height() / this.image.height;
-    this.scale   = Math.max(this.scaleX, this.scaleY);
-    this.maxLeft = this.options.repeat === 'no-repeat' ? this.$imageCont.width() - (this.scaleY * this.image.width) : -Infinity;
+    //using $window dimensions to avoid scrollbars.
+    var scaleX = this.$window.width() / (this.image.width / this.options.walls);
+    var scaleY = (this.$window.height()) / this.image.height;
+    this.scale = Math.min(scaleX, scaleY);
+
+    this.$element.css({
+      'width'  : this.scale * this.image.width / this.options.walls,
+      'height' : this.scale * this.image.height
+    });
+    this.maxLeft = - (this.scale * this.image.width - this.$element.width());
   };
 
   Panoramix.prototype.placeItems = function () {
@@ -128,6 +155,7 @@
     this.setupContainer();
     this.setupChildrenCont();
     this.setupImageCont();
+    this.addArrows();
   };
 
   Panoramix.prototype.setupContainer = function () {
@@ -139,7 +167,8 @@
       '-ms-user-select'       : 'none',
       '-webkit-touch-callout' : 'none',
       '-webkit-user-select'   : 'none',
-      'user-select'           : 'none'
+      'user-select'           : 'none',
+      'margin'                : '0 auto'
     }).on('dragstart', function (e) {
       e.preventDefault();
       return false;
@@ -164,7 +193,7 @@
       'class' : Panoramix.PREFIX + 'image',
       'css'   : {
         'backgroundImage'     : 'url(' + this.image.src + ')',
-        'backgroundRepeat'    : this.options.repeat,
+        'backgroundRepeat'    : 'no-repeat',
         'backgroundSize'      : 'cover',
         'backgroundPosition'  : '0px 0px',
         'width'               : '100%',
@@ -172,6 +201,41 @@
         'display'             : 'none'
       }
     })).parent();
+  };
+
+  Panoramix.prototype.addArrows = function () {
+    var $leftArrow = $('<a>', {
+      'data-direction' : 'left',
+      'html'           : '&#8249;',
+      'href'           : '#',
+      'css'            : {
+        'color'          : 'white',
+        'position'       : 'absolute',
+        'fontSize'       : '50px',
+        'height'         : '80px',
+        'top'            : '0',
+        'bottom'         : '0',
+        'left'           : '0',
+        'zIndex'         : '1',
+        'textDecoration' : 'none',
+        'margin'         : 'auto 15px'
+      },
+      click : function (e) {
+        e.preventDefault();
+        that.slide($(this).data('direction'));
+      }
+    });
+
+    var $rightArrow = $leftArrow
+      .clone(true)
+      .data('direction', 'right')
+      .html('&#8250;')
+      .css({
+        'left'  : 'auto',
+        'right' : '0'
+      });
+
+    this.$element.prepend($leftArrow, $rightArrow);
   };
 
   //

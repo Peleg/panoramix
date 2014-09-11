@@ -7,12 +7,16 @@
         width: 100%;
         margin: 0;
       }
+      h4, form {
+        text-align: center;
+      }
     </style>
     <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="panoramix.js"></script>
     <script>
       $(document).on('ready', function () {
         $('.box').panoramix({
+          walls: 4,
           imageUrl: 'assets/bg/wall.jpg',
           load: function () {
             // bind adding new images
@@ -42,26 +46,25 @@
   </head>
 
   <body>
+    <h4>Resize window and see how everything scales and maintains its position</h4>
+
+    <form action="">
+      <input type="FILE">
+    </form>
+
     <div class="box" style="width: 100%; height: 100%; margin: 0 auto;">
       <a href="javascript:alert('clicked!');" data-width='600' data-left='217' data-top='300'>
-        <img alt="fuck alts" src="assets/chldrn/ppl/1.png" style="max-width: 100%;">
+        <img alt="alts" src="assets/chldrn/ppl/1.png" style="max-width: 100%;">
       </a>
       <a href="javascript:alert('clicked!');" data-width='200' data-left='1000' data-top='280'>
-        <img alt="fuck alts" src="assets/chldrn/ppl/2.png" style="max-width: 100%;">
+        <img alt="alts" src="assets/chldrn/ppl/2.png" style="max-width: 100%;">
       </a>
       <a href="javascript:alert('clicked!');" data-width='120' data-left='1517' data-top='400'>
-        <img alt="fuck alts" src="assets/chldrn/ppl/3.png" style="max-width: 100%;">
-      </a>
-      <a href="javascript:alert('clicked!');" data-width='600' data-left='1517' data-top='300'>
-        <img alt="fuck alts" src="assets/chldrn/ppl/4.gif" style="max-width: 100%;">
+        <img alt="alts" src="assets/chldrn/ppl/3.png" style="max-width: 100%;">
       </a>
       <a href="javascript:alert('clicked!');" data-width='380' data-left='2100' data-top='350'>
-        <img alt="fuck alts" src="assets/chldrn/ppl/6.png" style="max-width: 100%;">
+        <img alt="alts" src="assets/chldrn/ppl/6.png" style="max-width: 100%;">
       </a>
     </div>
-
-    <!--<form action="">-->
-      <!--<input type="FILE">-->
-    <!--</form>-->
   </body>
 </html>
