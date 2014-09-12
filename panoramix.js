@@ -21,8 +21,6 @@
       that.showImage();
       that.bindDragging();
       that.layout();
-
-      var timeOut;
       that.$window.resize(function () {
         setTimeout(function () {
           that.layout();
